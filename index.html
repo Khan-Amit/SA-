@@ -73,6 +73,18 @@
             cursor: pointer;
             margin-top: 10px;
         }
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .button-group button {
+            margin-top: 0;
+            flex: 1;
+        }
+        .download-btn {
+            background: #d4a017;
+        }
         .result {
             background: #eaf7ea;
             padding: 16px;
@@ -89,6 +101,14 @@
             margin: 12px 0;
             font-size: 0.8rem;
             border-left: 4px solid #d4a017;
+        }
+        .kit-description {
+            background: #e0f0e8;
+            padding: 12px;
+            border-radius: 16px;
+            margin: 12px 0;
+            font-size: 0.85rem;
+            border-left: 4px solid #2d5a3b;
         }
         footer {
             background: #1e3a2f;
@@ -117,6 +137,20 @@
                 <option value="compost">Traditional Farmyard Compost</option>
             </select>
 
+            <label>🌿 Space Type</label>
+            <select id="spaceType">
+                <option value="open">Open field</option>
+                <option value="shaded">Shaded (partial sun)</option>
+                <option value="greenhouse">Greenhouse (controlled)</option>
+            </select>
+
+            <label>👨‍🌾 Grower Type</label>
+            <select id="growerType">
+                <option value="corporate">Corporate (≥1 hectare)</option>
+                <option value="medium">Medium (0.1–1 hectare commercial)</option>
+                <option value="home">Home grower (non-commercial, rooftop/garden)</option>
+            </select>
+
             <label>🥬 For which crop / plant?</label>
             <select id="cropType">
                 <option value="vegetables">Vegetables (tomato, brinjal, leafy)</option>
@@ -137,6 +171,9 @@
             </select>
 
             <button id="calculateBtn">🌿 Calculate & Show Recipe</button>
+            <div class="button-group">
+                <button id="downloadBtn" class="download-btn">📥 Download Recipe (TXT)</button>
+            </div>
         </div>
 
         <div id="resultArea" class="result" style="display:none;"></div>
@@ -263,8 +300,100 @@
         }
     };
 
+    // Helper: get kit description based on space + grower
+    function getKitDescription(space, grower, fertName) {
+        let desc = "";
+        if (grower === "corporate") {
+            desc += "🏭 **Corporate Kit (≥1 hectare)**: Recommended bulk production. Use mechanized application (tractor-mounted sprayers for liquid, spreaders for solids).\n";
+            desc += "📦 **Kit includes**: 500L drum x4, commercial stirrer, pH meter, moisture meter, 1000L storage tank, spray pump.\n";
+            desc += "💧 **Water requirement**: High – integrate with drip irrigation.\n";
+        } else if (grower === "medium") {
+            desc += "🚜 **Medium Grower Kit (0.1–1 hectare)**: Semi-commercial. Use knapsack sprayers or small drum mixers.\n";
+            desc += "📦 **Kit includes**: 200L drum x2, hand stirrer, pH strips, 500L tank, manual sprayer.\n";
+            desc += "💧 **Water requirement**: Moderate – rain barrel or borewell.\n";
+        } else {
+            desc += "🏡 **Home Grower Kit (non-commercial)**: Small batch for rooftop or garden. Hand application.\n";
+            desc += "📦 **Kit includes**: 50L bucket, wooden stick, measuring cup, small spray bottle.\n";
+            desc += "💧 **Water requirement**: Low – tap water or rainwater.\n";
+        }
+
+        if (space === "shaded") {
+            desc += "🌥️ **Shaded space**: Reduce dosage by 20% (less evaporation, slower growth). Monitor for fungal issues.\n";
+        } else if (space === "greenhouse") {
+            desc += "🏠 **Greenhouse**: Controlled environment – use fine mist sprayers. Monitor humidity. Increase frequency but reduce volume.\n";
+        } else {
+            desc += "☀️ **Open field**: Full sun – apply early morning or late evening to avoid leaf burn.\n";
+        }
+
+        desc += `\n🌱 **Recommended for ${fertName}**: Adjust batch size based on area. For corporate, multiply batch by 10-50x.`;
+        return desc;
+    }
+
+    // Generate full recipe text (for display and download)
+    function generateRecipeText(fert, crop, batchSize, costType, unitCost, totalCost, ingredientList, space, grower) {
+        const fertName = fert.name;
+        const kitDesc = getKitDescription(space, grower, fertName);
+        const unit = batchSize > 10 ? "kg" : "L";
+        return `
+╔══════════════════════════════════════════════════════════════════╗
+║                    ENKOMOS-Fertilizer Recipe                     ║
+║                          [OFFICIAL]                              ║
+╚══════════════════════════════════════════════════════════════════╝
+
+📋 FERTILIZER: ${fertName} (${fert.type})
+🌍 Indigenous origin: ${fert.indigenousOrigin}
+🌿 Space: ${space === 'open' ? 'Open field' : space === 'shaded' ? 'Shaded' : 'Greenhouse'}
+👨‍🌾 Grower: ${grower === 'corporate' ? 'Corporate (≥1 ha)' : grower === 'medium' ? 'Medium (0.1-1 ha)' : 'Home grower'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧪 INGREDIENTS (${costType === 'traditional' ? 'Traditional' : costType === 'modern' ? 'Modern Organic' : 'Chemical'}):
+${ingredientList.map(i => "• " + i).join('\n')}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚙️ PRODUCTION PROCESS:
+${fert.process}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧑‍🌾 APPLICATION METHOD:
+${fert.application}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 MONITORING:
+${fert.monitoring}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🛠️ EQUIPMENT NEEDED:
+${fert.equipment}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⏳ TIME REQUIRED: ${fert.timeDays} days
+📦 MINIMUM BATCH: ${fert.minBatch}  |  BULK BATCH: ${fert.bulkBatch}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💰 COST FOR ${batchSize} ${unit} (${costType}): $${totalCost.toFixed(2)} ($${unitCost.toFixed(2)} per ${unit})
+🌍 Chemical alternative cost: $${(fert.costPerLiter.chemical * batchSize).toFixed(2)}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🛒 KIT DESCRIPTION (based on space & grower):
+${kitDesc}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌾 FOR CROP: ${crop}
+💡 Tip: Apply at recommended growth stage. Test on small area first.
+
+🪷 ENKOMOS-Fertilizer respects indigenous knowledge. 60% of profits support farming communities.
+
+Report generated: ${new Date().toLocaleString()}
+        `;
+    }
+
+    // Display and enable download
+    let currentRecipeText = "";
+
     document.getElementById('calculateBtn').addEventListener('click', function() {
         const fertKey = document.getElementById('fertilizerType').value;
+        const space = document.getElementById('spaceType').value;
+        const grower = document.getElementById('growerType').value;
         const crop = document.getElementById('cropType').options[document.getElementById('cropType').selectedIndex].text;
         let batchSize = parseFloat(document.getElementById('batchSize').value);
         if (isNaN(batchSize)) batchSize = 20;
@@ -283,26 +412,30 @@
             (costType === 'traditional' ? fert.ingredientsTraditional : fert.ingredientsModern) :
             ["Chemical fertilizer (e.g., urea, DAP) – not recommended for organic farming"];
 
-        const output = `
-            🌿 <strong>${fert.name}</strong> (${fert.type})<br>
-            📜 <strong>Indigenous origin:</strong> ${fert.indigenousOrigin}<br><br>
-            🧪 <strong>Ingredients (${costType === 'traditional' ? 'Traditional' : costType === 'modern' ? 'Modern Organic' : 'Chemical'}):</strong><br>
-            ${ingredientList.map(i => "• " + i).join('<br>')}<br><br>
-            ⚙️ <strong>Production process:</strong> ${fert.process}<br><br>
-            🧑‍🌾 <strong>How to use:</strong> ${fert.application}<br><br>
-            🔍 <strong>Monitoring:</strong> ${fert.monitoring}<br><br>
-            🛠️ <strong>Equipment needed:</strong> ${fert.equipment}<br><br>
-            ⏳ <strong>Time required:</strong> ${fert.timeDays} days<br>
-            📦 <strong>Minimum batch:</strong> ${fert.minBatch} &nbsp; | &nbsp; <strong>Bulk batch:</strong> ${fert.bulkBatch}<br><br>
-            💰 <strong>Cost for ${batchSize} ${batchSize > 10 ? 'kg' : 'L'} (${costType}):</strong> $${totalCost.toFixed(2)} ($${unitCost.toFixed(2)} per unit)<br>
-            🌍 <strong>Chemical alternative cost:</strong> $${(fert.costPerLiter.chemical * batchSize).toFixed(2)}<br>
-            <div class="info-box">🌾 <strong>For ${crop}</strong> – Apply at recommended growth stage. Always test on small area first.</div>
-            <em>🪷 ENKOMOS-Fertilizer respects indigenous knowledge. 60% of profits support farming communities.</em>
-        `;
+        const recipeText = generateRecipeText(fert, crop, batchSize, costType, unitCost, totalCost, ingredientList, space, grower);
+        currentRecipeText = recipeText;
 
+        // Display as HTML (preserve line breaks)
+        const output = recipeText.replace(/\n/g, '<br>').replace(/╔/g, '<strong>').replace(/╗/g, '</strong>');
         const resultDiv = document.getElementById('resultArea');
-        resultDiv.innerHTML = output;
+        resultDiv.innerHTML = `<pre style="white-space: pre-wrap; font-family: monospace; font-size: 0.8rem;">${recipeText}</pre>`;
         resultDiv.style.display = 'block';
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+        if (!currentRecipeText) {
+            alert("Please click 'Calculate & Show Recipe' first.");
+            return;
+        }
+        const blob = new Blob([currentRecipeText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ENKOMOS_Fertilizer_Recipe_${Date.now().slice(-8)}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     });
 </script>
 </body>
