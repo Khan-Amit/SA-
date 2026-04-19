@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>ENKOMOS-Fertilizer | Organic Fertilizer Guide & Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #1e3a2f;
+            padding: 16px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fef9e6;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        header {
+            background: #2d5a3b;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 1.6rem;
+        }
+        header p {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+        .step {
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+            color: #1e3a2f;
+        }
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0d6b0;
+            border-radius: 16px;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            background: white;
+        }
+        button {
+            background: #2d5a3b;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .result {
+            background: #eaf7ea;
+            padding: 16px;
+            border-radius: 20px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .info-box {
+            background: #fff3cf;
+            padding: 12px;
+            border-radius: 16px;
+            margin: 12px 0;
+            font-size: 0.8rem;
+            border-left: 4px solid #d4a017;
+        }
+        footer {
+            background: #1e3a2f;
+            color: #aaa;
+            text-align: center;
+            padding: 16px;
+            font-size: 0.7rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🌱 ENKOMOS-Fertilizer</h1>
+        <p>Indigenous wisdom • Traditional methods • Modern organic upgrades</p>
+    </header>
+
+    <div class="step">
+        <div class="card">
+            <label>🌾 Select Fertilizer Type</label>
+            <select id="fertilizerType">
+                <option value="jeevamrut">Jeevamrut (Liquid bio-fertilizer)</option>
+                <option value="vermicompost">Vermicompost (Solid manure)</option>
+                <option value="panchagavya">Panchagavya (Growth promoter)</option>
+                <option value="neemcake">Neem Cake Powder</option>
+                <option value="compost">Traditional Farmyard Compost</option>
+            </select>
+
+            <label>🥬 For which crop / plant?</label>
+            <select id="cropType">
+                <option value="vegetables">Vegetables (tomato, brinjal, leafy)</option>
+                <option value="fruits">Fruits (mango, banana, citrus)</option>
+                <option value="grains">Grains (rice, wheat, maize)</option>
+                <option value="herbs">Herbs / Medicinal</option>
+                <option value="flowers">Flowers (marigold, rose)</option>
+            </select>
+
+            <label>📦 Batch size (kg or liters)</label>
+            <input type="number" id="batchSize" value="20" step="1">
+
+            <label>💰 Cost comparison</label>
+            <select id="costType">
+                <option value="traditional">Traditional ingredients (local only)</option>
+                <option value="modern">Modern organic substitutes (certified)</option>
+                <option value="chemical">Chemical fertilizer (for reference)</option>
+            </select>
+
+            <button id="calculateBtn">🌿 Calculate & Show Recipe</button>
+        </div>
+
+        <div id="resultArea" class="result" style="display:none;"></div>
+    </div>
+
+    <footer>
+        ENKOMOS-Fertilizer • Based on indigenous knowledge • 60% of profits go to farming communities
+    </footer>
+</div>
+
+<script>
+    // Fertilizer Knowledge Base
+    const fertilizerDB = {
+        jeevamrut: {
+            name: "Jeevamrut",
+            type: "Liquid bio-fertilizer",
+            indigenousOrigin: "India, Nepal, Bangladesh (traditional zero-budget natural farming)",
+            ingredientsTraditional: [
+                "Cow dung (10 kg)",
+                "Cow urine (10 L)",
+                "Jaggery (1 kg)",
+                "Pulse flour (1 kg)",
+                "Handful of field soil"
+            ],
+            ingredientsModern: [
+                "Cow dung (10 kg) OR composted manure",
+                "Cow urine (10 L) OR fermented plant tea",
+                "Molasses (0.8 kg) as substitute for jaggery",
+                "Commercial yeast extract (200g) instead of pulse flour",
+                "Soil from organic field"
+            ],
+            process: "Mix all in 200L drum with 100L water. Stir twice daily. Ferment for 5-7 days. Smell should be earthy, not foul.",
+            application: "Dilute 1:10 with water. Apply as soil drench or foliar spray every 15 days.",
+            monitoring: "Smell (no ammonia), pH (6-7), brownish color, white froth indicates good microbes.",
+            equipment: "Plastic drum, wooden stirrer, muslin cloth, measuring cup, pH strips (optional).",
+            timeDays: 7,
+            minBatch: "20 L",
+            bulkBatch: "500 L",
+            costPerLiter: { traditional: 0.18, modern: 0.14, chemical: 0.45 }
+        },
+        vermicompost: {
+            name: "Vermicompost",
+            type: "Solid organic manure",
+            indigenousOrigin: "Earthworm composting known for centuries; modern refinement with Eisenia fetida",
+            ingredientsTraditional: [
+                "Cow dung (100 kg)",
+                "Crop residues (50 kg)",
+                "Local earthworms (Perionyx excavatus)"
+            ],
+            ingredientsModern: [
+                "Cow dung or buffalo dung (100 kg)",
+                "Green waste / leaf litter (50 kg)",
+                "Eisenia fetida (red wigglers) 1000 nos"
+            ],
+            process: "Layer bedding (coconut coir), add worms, feed gradually with dung+residue, maintain 60% moisture, harvest after 60-90 days.",
+            application: "Mix into soil at 2-5 tons/hectare or top dress around plants.",
+            monitoring: "Moisture (60-70%), temperature (20-30°C), worm population, absence of foul smell.",
+            equipment: "Bins (wooden/plastic), shade net, sprayer, 5mm sieve.",
+            timeDays: 75,
+            minBatch: "50 kg",
+            bulkBatch: "5 tons",
+            costPerKg: { traditional: 0.10, modern: 0.12, chemical: 0.30 }
+        },
+        panchagavya: {
+            name: "Panchagavya",
+            type: "Growth promoter & bio-stimulant",
+            indigenousOrigin: "Ancient Ayurvedic formula using five cow products",
+            ingredientsTraditional: [
+                "Cow dung (5 kg)",
+                "Cow urine (3 L)",
+                "Cow milk (2 L)",
+                "Cow curd (2 L)",
+                "Cow ghee (1 kg)",
+                "Tender coconut water (3 L)",
+                "Ripe banana (12 nos)",
+                "Jaggery (3 kg)"
+            ],
+            ingredientsModern: [
+                "Cow dung (5 kg) – dried and powdered",
+                "Cow urine (3 L) – if available; else fermented plant juice",
+                "Milk & curd can be substituted with buttermilk",
+                "Ghee from organic stores",
+                "Coconut water (canned)",
+                "Jaggery or molasses"
+            ],
+            process: "Mix all, ferment in mud pot for 15-20 days, stir twice daily. Dilute 1:20 before use.",
+            application: "Foliar spray every 20 days. Also seed treatment.",
+            monitoring: "Color (creamy brown), alcoholic smell, no mold.",
+            equipment: "Earthen pot, wooden ladle, sprayer.",
+            timeDays: 18,
+            minBatch: "10 L",
+            bulkBatch: "200 L",
+            costPerLiter: { traditional: 0.40, modern: 0.35, chemical: 0.45 }
+        },
+        neemcake: {
+            name: "Neem Cake Powder",
+            type: "Organic soil amendment & pest repellent",
+            indigenousOrigin: "Neem (Azadirachta indica) used for millennia in South Asia",
+            ingredientsTraditional: ["Neem seeds (cold-pressed residue)", "Powdering manually"],
+            ingredientsModern: ["De-oiled neem cake (commercial powder)", "Often mixed with bone meal"],
+            process: "Crush neem seeds, extract oil, the remaining cake is dried and powdered.",
+            application: "Mix into soil at 100-200 kg/acre before planting. Also top dressing.",
+            monitoring: "Check for uniform powder, no lumps, moisture < 10%.",
+            equipment: "Hammer mill or mortar, sieve, storage bags.",
+            timeDays: 3,
+            minBatch: "5 kg",
+            bulkBatch: "1000 kg",
+            costPerKg: { traditional: 0.25, modern: 0.30, chemical: 0.45 }
+        },
+        compost: {
+            name: "Farmyard Compost",
+            type: "Aged manure + plant residue",
+            indigenousOrigin: "Universal traditional composting",
+            ingredientsTraditional: ["Cattle dung", "Straw", "Ash", "Kitchen waste"],
+            ingredientsModern: ["Green waste", "Brown waste (cardboard)", "Microbial inoculant"],
+            process: "Pile layers, turn every 15 days, keep moist. Mature in 3-4 months.",
+            application: "Broadcast 5-10 tons/hectare before plowing.",
+            monitoring: "Temperature (cools down when ready), earthy smell, crumbly texture.",
+            equipment: "Pitchfork, moisture meter (optional), thermometer.",
+            timeDays: 120,
+            minBatch: "200 kg",
+            bulkBatch: "20 tons",
+            costPerKg: { traditional: 0.05, modern: 0.07, chemical: 0.30 }
+        }
+    };
+
+    document.getElementById('calculateBtn').addEventListener('click', function() {
+        const fertKey = document.getElementById('fertilizerType').value;
+        const crop = document.getElementById('cropType').options[document.getElementById('cropType').selectedIndex].text;
+        let batchSize = parseFloat(document.getElementById('batchSize').value);
+        if (isNaN(batchSize)) batchSize = 20;
+        const costType = document.getElementById('costType').value;
+
+        const fert = fertilizerDB[fertKey];
+        if (!fert) return;
+
+        let unitCost;
+        if (costType === 'traditional') unitCost = fert.costPerLiter.traditional;
+        else if (costType === 'modern') unitCost = fert.costPerLiter.modern;
+        else unitCost = fert.costPerLiter.chemical;
+
+        const totalCost = unitCost * batchSize;
+        const ingredientList = (costType === 'traditional' || costType === 'modern') ? 
+            (costType === 'traditional' ? fert.ingredientsTraditional : fert.ingredientsModern) :
+            ["Chemical fertilizer (e.g., urea, DAP) – not recommended for organic farming"];
+
+        const output = `
+            🌿 <strong>${fert.name}</strong> (${fert.type})<br>
+            📜 <strong>Indigenous origin:</strong> ${fert.indigenousOrigin}<br><br>
+            🧪 <strong>Ingredients (${costType === 'traditional' ? 'Traditional' : costType === 'modern' ? 'Modern Organic' : 'Chemical'}):</strong><br>
+            ${ingredientList.map(i => "• " + i).join('<br>')}<br><br>
+            ⚙️ <strong>Production process:</strong> ${fert.process}<br><br>
+            🧑‍🌾 <strong>How to use:</strong> ${fert.application}<br><br>
+            🔍 <strong>Monitoring:</strong> ${fert.monitoring}<br><br>
+            🛠️ <strong>Equipment needed:</strong> ${fert.equipment}<br><br>
+            ⏳ <strong>Time required:</strong> ${fert.timeDays} days<br>
+            📦 <strong>Minimum batch:</strong> ${fert.minBatch} &nbsp; | &nbsp; <strong>Bulk batch:</strong> ${fert.bulkBatch}<br><br>
+            💰 <strong>Cost for ${batchSize} ${batchSize > 10 ? 'kg' : 'L'} (${costType}):</strong> $${totalCost.toFixed(2)} ($${unitCost.toFixed(2)} per unit)<br>
+            🌍 <strong>Chemical alternative cost:</strong> $${(fert.costPerLiter.chemical * batchSize).toFixed(2)}<br>
+            <div class="info-box">🌾 <strong>For ${crop}</strong> – Apply at recommended growth stage. Always test on small area first.</div>
+            <em>🪷 ENKOMOS-Fertilizer respects indigenous knowledge. 60% of profits support farming communities.</em>
+        `;
+
+        const resultDiv = document.getElementById('resultArea');
+        resultDiv.innerHTML = output;
+        resultDiv.style.display = 'block';
+    });
+</script>
+</body>
+</html>
